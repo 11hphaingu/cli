@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "pretty": true,
+    "rootDir": ".",
+    "baseUrl": ".",
+    "sourceMap": true,
+    "target": "es2019",
+    "outDir": "{{buildDir}}",
+    "declaration": true,
+    "declarationMap": {{hasDeclarationMap}},
+    // "declarationDir": "dist/_types",
+    "lib": [
+      "es2019"
+    ],
+    "resolveJsonModule": true,
+    "types": [
+      "node",
+      "jest",
+      // "reflect-metadata"
+    ],
+    "typeRoots": [
+      {{#if isSubmodule}}
+        "../../node_modules/"
+      {{/if}}
+    ],
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "{{testDir}}"{{#if includePaths.length}},{{/if}}
+    {{#each includePaths}}"{{this}}"{{#unless @last}},{{/unless}}{{/each}}
+    
+  ],
+  "exclude": [
+    "{{testDir}}/**/*.spec-cancel.ts",
+    "./{{buildDir}}"
+  ]
+}
