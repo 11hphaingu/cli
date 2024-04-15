@@ -4,13 +4,14 @@ import * as Option from "fp-ts/lib/Option";
 import { PackageJson } from "type-fest";
 import { mergeRight } from "ramda";
 
-import { flip, flow, pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import path from "path";
 import { FileSystem } from "./ports/filestystem-port";
 import { JsonUtil } from "./ports/json";
 import { ExecaPort } from "./ports/execa-port";
-import { HBSTemplatePort } from "./ports/template-port";
 import { tapExecTE } from "./fp/exeTE";
+import { match } from "ts-pattern";
+import { addDepsPkjson, buildFromTemplateFile, yarnInstall } from "./helpers";
 
 const addEslintDeps = (projectPath = process.cwd()) => {
   const pjPath = path.join(projectPath, "/package.json");
@@ -43,37 +44,74 @@ const addEslintDeps = (projectPath = process.cwd()) => {
 };
 
 const addEslintConfig =
-  (projectPath = process.cwd()) =>
-  (params: {
-    buildFolder: Option.Option<string>;
-    testFolder: Option.Option<string>;
-    tsconfigPath: Option.Option<string>;
-  }) => {
+  (params: { buildFolder: string; testFolder: string; tsconfigPath: string }) =>
+  (projectPath = process.cwd()) => {
     const { buildFolder, testFolder, tsconfigPath } = params;
-    const ESLINT_TEMPLATE_PATH = path.join(
-      __dirname,
+    return buildFromTemplateFile(
+      projectPath,
       "./resource/eslint-config-template.hbs",
+      "./eslintrc.js",
+      {
+        parser: "@typescript-eslint/parser",
+        buildFolder,
+        testFolder,
+        tsconfigPath,
+      },
+    );
+  };
+
+enum ProjectTypes {
+  node = "node",
+  browser = "browser",
+}
+
+const installTypescriptDeps =
+  (type: ProjectTypes = ProjectTypes.node) =>
+  (projectPath: string) => {
+    const mutualDeps = {
+      "type-fest": "~4.15.0",
+      typescript: "^5.4.5",
+    };
+    const devDepsByProjectType = pipe(
+      match(type)
+        .with(ProjectTypes.node, () => ({
+          "@types/node": "^18.16.6",
+        }))
+        .otherwise(() => ({})),
+      mergeRight(mutualDeps),
     );
     return pipe(
-      ESLINT_TEMPLATE_PATH,
-      FileSystem.readFile,
-      TaskEither.chain(
-        flow(
-          flip(HBSTemplatePort.compile)({
-            buildFolder: Option.getOrElse(() => "dist")(buildFolder),
-            testFolder: Option.getOrElse(() => "__test__")(testFolder),
-            tsconfigPath: Option.getOrElse(() => "tsconfig.json")(tsconfigPath),
-          }),
-          TaskEither.fromEither,
-        ),
-      ),
-      TaskEither.chain(
-        pipe(
-          projectPath,
-          (pj) => path.join(pj, "./.eslintrc.js"),
-          FileSystem.writeFile,
-        ),
-      ),
+      {
+        deps: {},
+        devDeps: devDepsByProjectType,
+      },
+      addDepsPkjson(projectPath),
+      TaskEither.chain(() => yarnInstall(projectPath)),
+    );
+  };
+
+const addTypescriptConfig =
+  (config: {
+    buildDir: string;
+    hasDeclarationMap: boolean;
+    isSubModule: boolean;
+    testDir: string;
+    includePaths: string[];
+  }) =>
+  (projectPath: string = process.cwd()) => {
+    const { buildDir, hasDeclarationMap, isSubModule, testDir, includePaths } =
+      config;
+    return buildFromTemplateFile(
+      projectPath,
+      "./resource/tsconfig.hbs.hbs",
+      "./tsconfig.json",
+      {
+        buildDir,
+        hasDeclarationMap,
+        isSubModule,
+        testDir,
+        includePaths,
+      },
     );
   };
 
@@ -83,16 +121,25 @@ export const SetupDevEnv: ISetupDevEnv = {
       params.projectPath,
       tapExecTE<string>(addEslintDeps),
       TaskEither.chain(
-        tapExecTE<string>(
-          flip(addEslintConfig)({
-            buildFolder: params.buildFolder,
-            testFolder: params.testFolder,
-            tsconfigPath: params.tsconfigPath,
-          }),
-        ),
+        addEslintConfig({
+          buildFolder: params.buildFolder,
+          testFolder: params.testFolder,
+          tsconfigPath: params.tsconfigPath,
+        }),
       ),
-      TaskEither.mapError((e) => new Error("setup eslint failed " + e)),
-      TaskEither.map(() => {}),
     ),
-  setupTypescript: () => TaskEither.right(),
+  setupTypescript: (params) =>
+    pipe(
+      params.projectPath,
+      tapExecTE(installTypescriptDeps()),
+      TaskEither.chain(
+        addTypescriptConfig({
+          buildDir: params.buildDir,
+          hasDeclarationMap: params.hasDeclarationMap,
+          isSubModule: params.isSubmodule,
+          testDir: params.testDir,
+          includePaths: params.includePaths,
+        }),
+      ),
+    ),
 };

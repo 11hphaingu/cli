@@ -16,8 +16,8 @@ interface ExecTE {
 
 interface TapExecTE {
   <T>(
-    main: (params: T) => TaskEither.TaskEither<unknown, unknown>,
-  ): (params: T) => TaskEither.TaskEither<unknown, T>;
+    main: (params: T) => TaskEither.TaskEither<any, any>,
+  ): (params: T) => TaskEither.TaskEither<any, T>;
 }
 
 export const execTE: ExecTE = (main) => (params) => {

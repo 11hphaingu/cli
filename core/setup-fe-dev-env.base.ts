@@ -1,17 +1,17 @@
 import { TaskEither } from "fp-ts/lib/TaskEither";
-import * as Option from "fp-ts/lib/Option";
 
 interface SetupEslint {
   (params: {
     projectPath: string;
-    buildFolder: Option.Option<string>;
-    testFolder: Option.Option<string>;
-    tsconfigPath: Option.Option<string>;
+    buildFolder: string;
+    testFolder: string;
+    tsconfigPath: string;
   }): TaskEither<Error, void>;
 }
 
 interface SetupTypescript {
   (params: {
+    projectPath: string;
     buildDir: string;
     testDir: string;
     hasDeclarationMap: boolean;
