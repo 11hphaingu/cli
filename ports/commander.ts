@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { readPkgJsonFile } from "core/helpers";
 import { Progress, ProgressTrait } from "core/ports/progress-cli-port";
 import { ISetupDevEnv, ProjectTypes } from "core/setup-fe-dev-env.base";
+import figlet from "figlet";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import { UnknownRecord } from "type-fest";
@@ -145,6 +146,9 @@ export const commanderInstance: Reader.Reader<
   return pipe(
     commandFactory(prepareTsAndEslWith(progressTrait, setupDevEnv)),
     TE.map((c) => c.program),
-    TE.tapIO((p) => () => p.parse()),
+    TE.tapIO((p) => () => {
+      console.log(figlet.textSync("Yang Lake Tech CLI"));
+      p.parse();
+    }),
   );
 };
