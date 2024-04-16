@@ -1,27 +1,19 @@
-import { ISetupDevEnv } from "./setup-fe-dev-env.base";
+import { ISetupDevEnv, ProjectTypes } from "./setup-fe-dev-env.base";
 import * as TaskEither from "fp-ts/lib/TaskEither";
-import * as Option from "fp-ts/lib/Option";
-import { PackageJson } from "type-fest";
 import { mergeRight } from "ramda";
 
-import { flow, pipe } from "fp-ts/lib/function";
-import path from "path";
-import { FileSystem } from "./ports/filestystem-port";
-import { JsonUtil } from "./ports/json";
-import { ExecaPort } from "./ports/execa-port";
+import { pipe } from "fp-ts/lib/function";
 import { tapExecTE } from "./fp/exeTE";
 import { match } from "ts-pattern";
 import { addDepsPkjson, buildFromTemplateFile, yarnInstall } from "./helpers";
 
-const addEslintDeps = (projectPath = process.cwd()) => {
-  const pjPath = path.join(projectPath, "/package.json");
-  return pipe(
-    pjPath,
-    FileSystem.readFile,
-    TaskEither.chain(flow(JsonUtil.parse<PackageJson>, TaskEither.fromEither)),
-    TaskEither.map(
-      mergeRight({
-        devDependencies: {
+const addEslintDeps =
+  (projectPath = process.cwd()) =>
+  (onStdout: (chunk: any) => void) => {
+    return pipe(
+      {
+        deps: {},
+        devDeps: {
           "@typescript-eslint/eslint-plugin": "^6.7.0",
           "@typescript-eslint/parser": "^6.7.0",
           eslint: "^7.30.0",
@@ -29,19 +21,11 @@ const addEslintDeps = (projectPath = process.cwd()) => {
           "eslint-plugin-prettier": "^5.0.0",
           prettier: "^3.2.5",
         },
-      }),
-    ),
-    TaskEither.map(JSON.stringify),
-    TaskEither.chain(FileSystem.writeFile(pjPath)),
-    TaskEither.chain(() =>
-      ExecaPort.exec({
-        file: "yarn install",
-        option: Option.none,
-        args: Option.none,
-      }),
-    ),
-  );
-};
+      },
+      addDepsPkjson(projectPath),
+      TaskEither.chain(() => yarnInstall(projectPath, onStdout)),
+    );
+  };
 
 const addEslintConfig =
   (params: { buildFolder: string; testFolder: string; tsconfigPath: string }) =>
@@ -60,14 +44,10 @@ const addEslintConfig =
     );
   };
 
-enum ProjectTypes {
-  node = "node",
-  browser = "browser",
-}
-
 const installTypescriptDeps =
   (type: ProjectTypes = ProjectTypes.node) =>
-  (projectPath: string) => {
+  (projectPath: string) =>
+  (onStdout: (chunk: any) => void) => {
     const mutualDeps = {
       "type-fest": "~4.15.0",
       typescript: "^5.4.5",
@@ -86,7 +66,7 @@ const installTypescriptDeps =
         devDeps: devDepsByProjectType,
       },
       addDepsPkjson(projectPath),
-      TaskEither.chain(() => yarnInstall(projectPath)),
+      TaskEither.chain(() => yarnInstall(projectPath, onStdout)),
     );
   };
 
@@ -103,7 +83,7 @@ const addTypescriptConfig =
       config;
     return buildFromTemplateFile(
       projectPath,
-      "./resource/tsconfig.hbs.hbs",
+      "./resource/tsconfig.hbs",
       "./tsconfig.json",
       {
         buildDir,
@@ -115,11 +95,11 @@ const addTypescriptConfig =
     );
   };
 
-export const SetupDevEnv: ISetupDevEnv = {
+export const SetupDevEnvWithExeca: ISetupDevEnv = {
   setupEslint: (params) =>
     pipe(
       params.projectPath,
-      tapExecTE<string>(addEslintDeps),
+      tapExecTE<string>((pP) => addEslintDeps(pP)(params.onStdOut)),
       TaskEither.chain(
         addEslintConfig({
           buildFolder: params.buildFolder,
@@ -131,7 +111,9 @@ export const SetupDevEnv: ISetupDevEnv = {
   setupTypescript: (params) =>
     pipe(
       params.projectPath,
-      tapExecTE(installTypescriptDeps()),
+      tapExecTE((pP) =>
+        installTypescriptDeps(params.projectType)(pP)(params.onStdOut),
+      ),
       TaskEither.chain(
         addTypescriptConfig({
           buildDir: params.buildDir,

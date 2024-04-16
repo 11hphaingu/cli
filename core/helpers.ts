@@ -4,11 +4,11 @@ import { FileSystem } from "./ports/filestystem-port";
 import * as TaskEither from "fp-ts/lib/TaskEither";
 import { JsonUtil } from "./ports/json";
 import { PackageJson, UnknownRecord } from "type-fest";
-import { mergeRight } from "ramda";
+import { mergeDeepRight } from "ramda";
 import * as Option from "fp-ts/lib/Option";
 import { ExecaPort } from "./ports/execa-port";
-import { absordTE } from "yl-ddd-ts";
 import { HBSTemplatePort } from "./ports/template-port";
+import { ExecaChildProcess } from "execa";
 
 interface AddDepsPkjson {
   (
@@ -20,7 +20,10 @@ interface AddDepsPkjson {
 }
 
 interface YarnInstall {
-  (projectPath: string): TaskEither.TaskEither<Error, void>;
+  (
+    projectPath: string,
+    onOuputStream: (chunk: any) => void,
+  ): TaskEither.TaskEither<Error, ExecaChildProcess<string>>;
 }
 
 type BuildFileFromTpl = <T = UnknownRecord>(
@@ -49,27 +52,29 @@ export const addDepsPkjson: AddDepsPkjson =
       pkjsonPath,
       readPkgJsonFile,
       TaskEither.map(
-        mergeRight({
+        mergeDeepRight({
           dependencies: deps,
           devDependencies: devDeps,
         }),
       ),
+      // TaskEither.tapIO((pkgData) => () => console.log("pkgData", pkgData)),
       TaskEither.map(JSON.stringify),
       TaskEither.chain(FileSystem.writeFile(pkjsonPath)),
     );
   };
 
-export const yarnInstall: YarnInstall = (projectPath: string) =>
-  pipe(
-    ExecaPort.exec({
-      file: "yarn",
-      option: Option.some({
-        cwd: projectPath,
-      }),
-      args: Option.some(["install"]),
+export const yarnInstall: YarnInstall = (
+  projectPath: string,
+  onOuputStream: (chunk: any) => void,
+) =>
+  ExecaPort.exec({
+    file: "yarn",
+    option: Option.some({
+      cwd: projectPath,
     }),
-    absordTE,
-  );
+    args: Option.some(["install"]),
+    onStdout: onOuputStream,
+  });
 
 export const buildFromTemplateFile: BuildFileFromTpl = <T = UnknownRecord>(
   projectPath: string,

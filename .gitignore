@@ -1,3 +1,5 @@
 node_modules
 dist
 .yarn
+__test__/mockProject/**/*
+!__test__/mockProject/package.json

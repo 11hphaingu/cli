@@ -15,6 +15,8 @@ import rimraf from "rimraf";
  */
 export interface FileSystem {
   readonly readFile: (path: string) => TE.TaskEither<Error, string>;
+
+  readonly closeFile: (fileDescriptor: number) => TE.TaskEither<Error, void>;
   /**
    * If the parent directory does not exist, it's created.
    */
@@ -69,6 +71,9 @@ const readFile: (
   fs.readFile,
 );
 
+const closeFile: (fileDescriptor: number) => TE.TaskEither<Error, void> =
+  TE.taskify(fs.close);
+
 const writeFile: (
   path: string,
   data: string,
@@ -118,6 +123,7 @@ export const FileSystem: FileSystem = {
   readFile: (path) => pipe(readFile(path, "utf8")),
   writeFile: (path) => (content) =>
     pipe(writeFile(path, content, { encoding: "utf8" })),
+  closeFile: (fileD: number) => closeFile(fileD),
   exists,
   remove: (pattern) => pipe(remove(pattern, {})),
   search: (pattern, exclude) => pipe(search(pattern, { ignore: exclude })),
