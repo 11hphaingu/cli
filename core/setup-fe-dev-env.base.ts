@@ -15,6 +15,13 @@ export enum ProjectTypes {
   node = "node",
   browser = "browser",
 }
+
+export enum ProjectSepecificTypes {
+  cli = "cli",
+  service = "service",
+  web = "web",
+}
+
 interface SetupTypescript {
   (params: {
     projectPath: string;
@@ -29,7 +36,12 @@ interface SetupTypescript {
   }): TaskEither<Error, void>;
 }
 
+type SetupProjectTool = (
+  projectType: ProjectSepecificTypes,
+) => TaskEither<Error, null>;
+
 export interface ISetupDevEnv {
   setupEslint: SetupEslint;
   setupTypescript: SetupTypescript;
+  setupProjectTool: SetupProjectTool;
 }
