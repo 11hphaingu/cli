@@ -1,45 +1,76 @@
 import { ISetupDevEnv, ProjectTypes } from "./setup-fe-dev-env.base";
 import * as TaskEither from "fp-ts/lib/TaskEither";
-import { mergeRight } from "ramda";
+import { mergeDeepRight, mergeRight } from "ramda";
 
 import { pipe } from "fp-ts/lib/function";
 import { tapExecTE } from "./fp/exeTE";
 import { match } from "ts-pattern";
-import { addDepsPkjson, buildFromTemplateFile, yarnInstall } from "./helpers";
+import {
+  AddDepsPkjsonParams,
+  addDepsPkjson,
+  buildFromTemplateFile,
+  yarnInstall,
+} from "./helpers";
+import { setupModule } from "./setup-project-tool.execa";
 
 const addEslintDeps =
-  (projectPath = process.cwd()) =>
+  (projectPath = process.cwd(), isHaveTs = true) =>
   (onStdout: (chunk: any) => void) => {
+    const addPkgParser = (isHaveTs: boolean) => (deps: AddDepsPkjsonParams) =>
+      isHaveTs
+        ? mergeDeepRight(deps, {
+            "@typescript-eslint/eslint-plugin": "^6.7.0",
+            "@typescript-eslint/parser": "^6.7.0",
+          })
+        : mergeDeepRight(deps, {
+            "@babel/eslint-parser": "7.24.1",
+          });
     return pipe(
       {
         deps: {},
         devDeps: {
-          "@typescript-eslint/eslint-plugin": "^6.7.0",
-          "@typescript-eslint/parser": "^6.7.0",
           eslint: "^7.30.0",
           "eslint-config-prettier": "^8.3.0",
           "eslint-plugin-prettier": "^5.0.0",
           prettier: "^3.2.5",
         },
       },
+      addPkgParser(isHaveTs),
       addDepsPkjson(projectPath),
       TaskEither.chain(() => yarnInstall(projectPath, onStdout)),
     );
   };
 
 const addEslintConfig =
-  (params: { buildFolder: string; testFolder: string; tsconfigPath: string }) =>
+  (params: {
+    buildFolder: string;
+    testFolder: string;
+    tsconfigPath: string;
+    hasTs: boolean;
+  }) =>
   (projectPath = process.cwd()) => {
-    const { buildFolder, testFolder, tsconfigPath } = params;
+    const { buildFolder, testFolder, tsconfigPath, hasTs } = params;
+
+    const whichParser = (conf: { hasTs: boolean }) =>
+      conf.hasTs ? "@typescript-eslint/parser" : "@babel/eslint-parser";
+
+    const parseOpts = (conf: { hasTs: boolean }) =>
+      conf.hasTs
+        ? {
+            project: tsconfigPath,
+            sourceType: "module",
+          }
+        : {};
+
     return buildFromTemplateFile(
       projectPath,
       "./resource/eslint-config-template.hbs",
       "./eslintrc.js",
       {
-        parser: "@typescript-eslint/parser",
+        parser: whichParser({ hasTs }),
         buildFolder,
         testFolder,
-        tsconfigPath,
+        parseOpts: parseOpts({ hasTs }),
       },
     );
   };
@@ -105,6 +136,7 @@ export const SetupDevEnvWithExeca: ISetupDevEnv = {
           buildFolder: params.buildFolder,
           testFolder: params.testFolder,
           tsconfigPath: params.tsconfigPath,
+          hasTs: params.hasTypescript,
         }),
       ),
     ),
@@ -124,4 +156,5 @@ export const SetupDevEnvWithExeca: ISetupDevEnv = {
         }),
       ),
     ),
+  setupProjectModule: setupModule,
 };

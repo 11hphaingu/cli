@@ -6,6 +6,7 @@ interface SetupEslint {
     buildFolder: string;
     testFolder: string;
     tsconfigPath: string;
+    hasTypescript: boolean;
     // TODO: onStdOut should return IO because it has sideeffect
     onStdOut: (chunk: any) => void;
   }): TaskEither<Error, void>;
@@ -16,8 +17,9 @@ export enum ProjectTypes {
   browser = "browser",
 }
 
-export enum ProjectSepecificTypes {
+export enum ProjectSpecificTypes {
   cli = "cli",
+  module = "module",
   service = "service",
   web = "web",
 }
@@ -36,12 +38,13 @@ interface SetupTypescript {
   }): TaskEither<Error, void>;
 }
 
-type SetupProjectTool = (
-  projectType: ProjectSepecificTypes,
-) => TaskEither<Error, null>;
+export type SetupProjectModule = (
+  projectType: ProjectSpecificTypes,
+  projectPath: string,
+) => TaskEither<Error, any>;
 
 export interface ISetupDevEnv {
   setupEslint: SetupEslint;
   setupTypescript: SetupTypescript;
-  setupProjectTool: SetupProjectTool;
+  setupProjectModule: SetupProjectModule;
 }

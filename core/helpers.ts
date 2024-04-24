@@ -10,13 +10,15 @@ import { ExecaPort } from "./ports/execa-port";
 import { HBSTemplatePort } from "./ports/template-port";
 import { ExecaChildProcess } from "execa";
 
+export type AddDepsPkjsonParams = {
+  deps: PackageJson["dependencies"];
+  devDeps: PackageJson["devDependencies"];
+};
+
 interface AddDepsPkjson {
   (
     projectPath: string,
-  ): (params: {
-    deps: PackageJson["dependencies"];
-    devDeps: PackageJson["devDependencies"];
-  }) => TaskEither.TaskEither<Error, void>;
+  ): (params: AddDepsPkjsonParams) => TaskEither.TaskEither<Error, PackageJson>;
 }
 
 interface YarnInstall {
@@ -31,37 +33,57 @@ type BuildFileFromTpl = <T = UnknownRecord>(
   dirNameRltTemplatePath: string,
   outDir: string,
   params: T,
-) => TaskEither.TaskEither<Error, void>;
+) => TaskEither.TaskEither<Error, any>;
 
 type ReadPkgJsonFile = (
   jsonPath: string,
 ) => TaskEither.TaskEither<Error, PackageJson>;
 
-export const readPkgJsonFile: ReadPkgJsonFile = (jsonPath: string) =>
+type WritePkgJsonFile = (
+  jsonPath: string,
+) => (content: PackageJson) => TaskEither.TaskEither<Error, void>;
+
+type AddAdditionalScript = (
+  pkg: PackageJson,
+) => (scripts: PackageJson["scripts"]) => PackageJson;
+
+export const readPkgJsonFile: ReadPkgJsonFile = (projectPath: string) =>
   pipe(
-    jsonPath,
+    path.join(projectPath, "/package.json"),
     FileSystem.readFile,
     TaskEither.chain(flow(JsonUtil.parse<PackageJson>, TaskEither.fromEither)),
   );
 
+export const writePkgJsonFile: WritePkgJsonFile =
+  (projectPath: string) => (content) => {
+    const jsonPath = path.join(projectPath, "/package.json");
+    return pipe(content, JSON.stringify, FileSystem.writeFile(jsonPath));
+  };
+
 export const addDepsPkjson: AddDepsPkjson =
   (projectPath: string) => (params) => {
     const { deps, devDeps } = params;
-    const pkjsonPath = path.join(projectPath, "/package.json");
     return pipe(
-      pkjsonPath,
+      projectPath,
       readPkgJsonFile,
       TaskEither.map(
-        mergeDeepRight({
-          dependencies: deps,
-          devDependencies: devDeps,
-        }),
+        (pkg) =>
+          mergeDeepRight(
+            {
+              dependencies: deps,
+              devDependencies: devDeps,
+            },
+            pkg,
+          ) as PackageJson,
       ),
       // TaskEither.tapIO((pkgData) => () => console.log("pkgData", pkgData)),
-      TaskEither.map(JSON.stringify),
-      TaskEither.chain(FileSystem.writeFile(pkjsonPath)),
+      TaskEither.tap(writePkgJsonFile(projectPath)),
     );
   };
+
+export const addScripts: AddAdditionalScript =
+  (pkg: PackageJson) => (scripts: PackageJson["scripts"]) =>
+    pipe(pkg, (pkg) => mergeDeepRight({ scripts }, pkg) as PackageJson);
 
 export const yarnInstall: YarnInstall = (
   projectPath: string,

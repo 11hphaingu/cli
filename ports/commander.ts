@@ -5,6 +5,7 @@ import { ISetupDevEnv, ProjectTypes } from "core/setup-fe-dev-env.base";
 import figlet from "figlet";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
+import { match } from "ts-pattern";
 import { UnknownRecord } from "type-fest";
 import { Either, Option, Reader, TE } from "yl-ddd-ts";
 
@@ -45,15 +46,14 @@ const commandFactory = (
               "your project type",
               "node",
             )
+            .option("--no-ts", "dont use ts ?")
             .option(
-              "--has-declaration-map [bool]",
+              "--has-declaration-map",
               "do you need generate declaration mapping for type building",
-              false,
             )
             .option(
-              "--is-sub-module [bool]",
+              "--is-sub-module",
               "is your project a package within a monorepo yarn context ?",
-              false,
             )
             .option(
               "--include-paths [paths...]",
@@ -88,6 +88,7 @@ const prepareTsAndEslWith =
       TE.bind("setupEslintResult", (params) =>
         setupDevEnv.setupEslint({
           projectPath,
+          hasTypescript: !options["noTs"],
           buildFolder: options["buildDir"] as string,
           testFolder: options["testFolder"] as string,
           tsconfigPath: options["tsconfigpath"] as string,
@@ -99,38 +100,43 @@ const prepareTsAndEslWith =
             })(params.progress)(),
         }),
       ),
-      TE.chain((a) =>
-        pipe(
-          a.progress,
-          progressTrait.updateProgress({
-            currentStep: Option.some(2),
-            currentJob: Option.some("setup eslint -> setup typescript"),
-            color: Option.some("green"),
-          }),
-          TE.fromIO,
-          TE.map((newProgress) => ({ ...a, progress: newProgress })),
-          TE.mapError((e) => e as Error),
-        ),
-      ),
       TE.bind("setupTypescriptResult", (params) =>
-        setupDevEnv.setupTypescript({
-          projectPath,
-          buildDir: options["buildDir"] as string,
-          testDir: options["testFolder"] as string,
-          hasDeclarationMap: options["hasDeclarationMap"] as boolean,
-          isSubmodule: options["isSubmodule"] as boolean,
-          includePaths: options["includePaths"] as string[],
-          onStdOut: (chunk: any) =>
-            progressTrait.updateProgress({
-              currentJob: Option.some(
-                `setup eslint -> setup typescript: ${chunk}`,
+        // two case, if config with noTs, dont need to execute the logic of setupTs
+        match(options["noTs"] as boolean)
+          .with(true, () => TE.right(null))
+          .otherwise(() =>
+            pipe(
+              params.progress,
+              progressTrait.updateProgress({
+                currentStep: Option.some(2),
+                currentJob: Option.some("setup eslint -> setup typescript"),
+                color: Option.some("green"),
+              }),
+              TE.fromIO,
+              TE.map((newProgress) => ({ ...params, progress: newProgress })), // update progress status
+              TE.mapError((e) => e as Error),
+              TE.chain(() =>
+                setupDevEnv.setupTypescript({
+                  projectPath,
+                  buildDir: options["buildDir"] as string,
+                  testDir: options["testFolder"] as string,
+                  hasDeclarationMap: options["hasDeclarationMap"] as boolean,
+                  isSubmodule: options["isSubmodule"] as boolean,
+                  includePaths: options["includePaths"] as string[],
+                  onStdOut: (chunk: any) =>
+                    progressTrait.updateProgress({
+                      currentJob: Option.some(
+                        `setup eslint -> setup typescript: ${chunk}`,
+                      ),
+                      currentStep: Option.none,
+                      color: Option.none,
+                    })(params.progress)(),
+                  // TODO: should parsing projectType
+                  projectType: options["projectType"] as ProjectTypes,
+                }),
               ),
-              currentStep: Option.none,
-              color: Option.none,
-            })(params.progress)(),
-          // TODO: should parsing projectType
-          projectType: options["projectType"] as ProjectTypes,
-        }),
+            ),
+          ),
       ),
       TE.tapIO((a) => pipe(a.progress, progressTrait.succeed)),
     );
