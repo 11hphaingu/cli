@@ -38,6 +38,7 @@ export const ExecaPort: ExecaPort = {
               TE.tryCatch(
                 async () => {
                   await subprocess;
+                  return subprocess;
                 },
                 (e) => e as Error,
               ),

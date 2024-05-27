@@ -1,14 +1,14 @@
 import { flow, pipe, flip } from "fp-ts/lib/function";
 import path from "path";
-import { FileSystem } from "./ports/filestystem-port";
 import * as TaskEither from "fp-ts/lib/TaskEither";
-import { JsonUtil } from "./ports/json";
 import { PackageJson, UnknownRecord } from "type-fest";
 import { mergeDeepRight } from "ramda";
 import * as Option from "fp-ts/lib/Option";
-import { ExecaPort } from "./ports/execa-port";
-import { HBSTemplatePort } from "./ports/template-port";
 import { ExecaChildProcess } from "execa";
+import { FileSystem } from "core/ports/filestystem-port";
+import { JsonUtil } from "core/ports/json";
+import { ExecaPort } from "core/ports/execa-port";
+import { HBSTemplatePort } from "core/ports/template-port";
 
 export type AddDepsPkjsonParams = {
   deps: PackageJson["dependencies"];
@@ -47,7 +47,9 @@ type AddAdditionalScript = (
   pkg: PackageJson,
 ) => (scripts: PackageJson["scripts"]) => PackageJson;
 
-export const readPkgJsonFile: ReadPkgJsonFile = (projectPath: string) =>
+export const readPkgJsonFile: ReadPkgJsonFile = (
+  projectPath: string = process.cwd(),
+) =>
   pipe(
     path.join(projectPath, "/package.json"),
     FileSystem.readFile,
@@ -101,7 +103,7 @@ export const yarnInstall: YarnInstall = (
 export const buildFromTemplateFile: BuildFileFromTpl = <T = UnknownRecord>(
   projectPath: string,
   dirNameRltTemplatePath: string,
-  prjRltOutDirPath: string,
+  prjRltOutDirPath: string = process.cwd(),
   params: T,
 ) => {
   const TEMPLATE_PATH = path.join(__dirname, dirNameRltTemplatePath);

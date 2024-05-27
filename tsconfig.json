@@ -31,11 +31,13 @@
   "include": [
     "core/**/*",
     "ports/**/*",
+    "impl/**/*",
     "__test__/**/*",
-    "index.ts"
+    "app.ts"
   ],
   "exclude": [
     "node_modules",
+    "core/substack",
     "__test__/**/*.spec-cancel.ts",
     "./dist"
   ]

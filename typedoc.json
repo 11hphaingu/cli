@@ -1,0 +1,6 @@
+{
+  "entryPoints": [
+    "./app.ts"
+  ],
+  "out": "doc"
+}

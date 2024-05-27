@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 import { ProgressSpinnerTrait } from "core/ports/progress-cli-port.spinner";
-import { SetupDevEnvWithExeca } from "core/setup-fe-dev-env.execa";
-import { commanderInstance } from "ports/commander";
+import { SetupDevEnvWithExeca } from "impl";
 import { Either, pipe } from "yl-ddd-ts";
 
-export * from "./core/index";
+export * from "./core";
+import * as port from "./ports";
+export { port };
 
-const commanderExe = commanderInstance({
+const commanderExe = port.commander.commanderInstance({
   progressTrait: ProgressSpinnerTrait,
   setupDevEnv: SetupDevEnvWithExeca,
 });
