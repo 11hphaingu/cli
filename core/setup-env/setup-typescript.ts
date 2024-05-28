@@ -60,6 +60,7 @@ export const ExcuteSetupTypescript: Reader.Reader<
           const mutualDeps = {
             "type-fest": "~4.15.0",
             typescript: "^5.4.5",
+            "@types/jest": "^29.5.12",
           };
           const devDepsByProjectType = pipe(
             match(setupEnvWork.projectType)

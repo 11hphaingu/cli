@@ -21,9 +21,14 @@ export const getPackageJsonGeneral = (
         "yl-ddd-ts": "^2.0.1",
         ramda: "^0.28.0",
       },
-      devDeps: {},
+      devDeps: {
+        "ts-jest": "^29.0.5",
+        jest: "^29.4.3",
+      },
       main: `${cjsBuildFolder}/index.js`,
-      script: {},
+      script: {
+        test: "jest --config jest.config.js",
+      },
     } as PkgCfg,
     mergeRight(
       match(projectType)

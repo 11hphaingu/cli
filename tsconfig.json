@@ -11,16 +11,13 @@
     "target": "es2021",
     "outDir": "./dist/cjs",
     "declaration": true,
-    // "declarationMap": true,
-    // "declarationDir": "dist/_types",
     "lib": [
       "es2019"
     ],
     "resolveJsonModule": true,
     "types": [
       "node",
-      "jest",
-      // "reflect-metadata"
+      "jest"
     ],
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
@@ -37,7 +34,6 @@
   ],
   "exclude": [
     "node_modules",
-    "core/substack",
     "__test__/**/*.spec-cancel.ts",
     "./dist"
   ]
