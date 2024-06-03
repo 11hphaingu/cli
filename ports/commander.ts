@@ -4,20 +4,35 @@
  */
 
 import { Command } from "commander";
-import { Progress, ProgressTrait } from "core/ports/progress-cli-port";
-import {
-  ISetupDevEnv,
-  ProjectTypes,
-  SetupEnvWork,
-  getProjectSpecificType,
-} from "core/setup-env/base";
 import figlet from "figlet";
-import { TaskEither } from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import { readPkgJsonFile } from "impl/helpers";
-import { match } from "ts-pattern";
-import { UnknownRecord } from "type-fest";
-import { Either, Option, Reader, TE } from "yl-ddd-ts";
+import path from "path";
+import { Either, TE } from "yl-ddd-ts";
+import { initSetupEslintCommand } from "./commander/init-setup-eslint.command";
+import { prop } from "ramda";
+import { initCommanderHavester } from "./commander/init-harvester.cmd";
+
+const IS_TEST = process.env.IS_TEST;
+
+const initCommand = () =>
+  pipe(
+    IS_TEST
+      ? path.resolve(__dirname, "..")
+      : path.resolve(__dirname, "../../.."),
+    readPkgJsonFile,
+    TE.map((pkgJson) => ({ pkgJson, program: new Command(pkgJson.name) })),
+    TE.tapEither(({ pkgJson, program }) =>
+      Either.tryCatch(
+        () =>
+          program
+            .description("CLI for Yltech dev")
+            .version(pkgJson.version || "1.0.1"),
+        identity,
+      ),
+    ),
+    TE.map(prop("program")),
+  );
 
 /**
  * Factory function to create a CLI command for setting up ESLint and TypeScript configurations.
@@ -50,68 +65,11 @@ import { Either, Option, Reader, TE } from "yl-ddd-ts";
  * });
  * ```
  */
-export const commandFactory = (
-  handler: (
-    projectPath: string,
-    options: UnknownRecord,
-  ) => TE.TaskEither<unknown, unknown>,
-) =>
+export const commandFactory = () =>
   pipe(
-    "./package.json",
-    readPkgJsonFile,
-    TE.map((pkgJson) => ({ pkgJson, program: new Command(pkgJson.name) })),
-    TE.tapEither(({ pkgJson, program }) =>
-      Either.tryCatch(
-        () =>
-          program
-            .description("CLI for Yltech dev")
-            .version(pkgJson.version || "1.0.1"),
-        identity,
-      ),
-    ),
-    TE.tapEither(({ program }) =>
-      Either.tryCatch(
-        () =>
-          program
-            .command("setup-eslint-ts")
-            .argument("[project-path]", ".")
-            .option("-bD, --build-dir [string]", "path of build Dir", "dist")
-            .option("-tD, --test-dir [string]", "path of test Dir", "__test__")
-            .option(
-              "-tscnf, --tsconfigpath [string]",
-              "tsconfig path for eslint parser",
-              "tsconfig.json",
-            )
-            .option(
-              "--project-type [node|browser]",
-              "your project type",
-              "node",
-            )
-            .option("--no-ts", "dont use ts ?")
-            .option(
-              "--has-declaration-map",
-              "do you need generate declaration mapping for type building",
-            )
-            .option(
-              "--is-sub-module",
-              "is your project a package within a monorepo yarn context ?",
-            )
-            .option(
-              "--include-paths [paths...]",
-              "paths should be percevied by typescript",
-              [],
-            )
-            .description("setup typescript and eslint for nodejs project")
-            .action((projectPath, opts) => {
-              handler(projectPath, opts)().then(
-                Either.match((er) => {
-                  program.error(`\n Error occured in handler: ${er}`);
-                }, identity),
-              );
-            }),
-        identity,
-      ),
-    ),
+    initCommand(),
+    TE.tapEither(initSetupEslintCommand),
+    TE.tapEither(initCommanderHavester),
   );
 /**
  * Factory function to create a handler for setting up TypeScript and ESLint configurations.
@@ -142,103 +100,12 @@ export const commandFactory = (
  * });
  * ```
  */
-export const prepareTsAndEslWith =
-  <P extends Progress>(
-    progressTrait: ProgressTrait<P>,
-    setupDevEnv: ISetupDevEnv,
-  ) =>
-  (projectPath: string, options: UnknownRecord) => {
-    const progress = progressTrait.construct(1, "setup eslint", 2);
-    const setupEnvWork: SetupEnvWork = {
-      projectPath,
-      isSubmodule: options["isSubmodule"] as boolean,
-      tsConfig: options["noTs"]
-        ? Option.none
-        : Option.some({
-            declarationMapping: options["hasDeclarationMap"] as boolean,
-            includePaths: options["includePaths"] as string[],
-            tsconfigPath: options["tsconfigpath"] as string,
-          }),
-      buildDir: options["buildDir"] as string,
-      testDir: options["testFolder"] as string,
-      projectType: options["projectType"] as ProjectTypes,
-      projectSpecificType: getProjectSpecificType(
-        options["projectSpecificType"] as string,
-      ),
-    };
-    return pipe(
-      progress,
-      progressTrait.start,
-      TE.fromIO,
-      TE.bindTo("progress"),
-      TE.bind("setupPackageSetting", (params) =>
-        setupDevEnv.setupProjectModule({
-          setupEnvWork,
-          onStdOut: (chunk: any) =>
-            progressTrait.updateProgress({
-              currentJob: Option.some(`setup eslint: ${chunk}`),
-              currentStep: Option.none,
-              color: Option.some("orange"),
-            })(params.progress)(),
-        }),
-      ),
-      TE.bind("setupEslintResult", (params) =>
-        setupDevEnv.setupEslint({
-          setupEnvWork,
-          onStdOut: (chunk: any) =>
-            progressTrait.updateProgress({
-              currentJob: Option.some(`setup eslint: ${chunk}`),
-              currentStep: Option.some(1),
-              color: Option.some("blue"),
-            })(params.progress)(),
-        }),
-      ),
-      TE.bind("setupTypescriptResult", (params) =>
-        // two case, if config with noTs, dont need to execute the logic of setupTs
-        match(options["noTs"] as boolean)
-          .with(true, () => TE.right(null))
-          .otherwise(() =>
-            pipe(
-              params.progress,
-              progressTrait.updateProgress({
-                currentStep: Option.some(2),
-                currentJob: Option.some("setup eslint -> setup typescript"),
-                color: Option.some("green"),
-              }),
-              TE.fromIO,
-              TE.map((newProgress) => ({ ...params, progress: newProgress })), // update progress status
-              TE.mapError((e) => e as Error),
-              TE.chain(() =>
-                setupDevEnv.setupTypescript({
-                  setupEnvWork,
-                  onStdOut: (chunk: any) =>
-                    progressTrait.updateProgress({
-                      currentJob: Option.some(
-                        `setup eslint -> setup typescript: ${chunk}`,
-                      ),
-                      currentStep: Option.none,
-                      color: Option.none,
-                    })(params.progress)(),
-                  // TODO: should parsing projectType
-                }),
-              ),
-            ),
-          ),
-      ),
-      TE.tapIO((a) => pipe(a.progress, progressTrait.succeed)),
-    );
-  };
 
-export const commanderInstance: Reader.Reader<
-  {
-    progressTrait: ProgressTrait<any>;
-    setupDevEnv: ISetupDevEnv;
-  },
-  TaskEither<unknown, unknown>
-> = ({ progressTrait, setupDevEnv }) => {
+export const commanderInstance = () => {
   return pipe(
-    commandFactory(prepareTsAndEslWith(progressTrait, setupDevEnv)),
-    TE.map((c) => c.program),
+    initCommand(),
+    TE.tapEither(initSetupEslintCommand),
+    TE.tapEither(initCommanderHavester),
     TE.tapIO((p) => () => {
       console.log(figlet.textSync("Yang Lake Tech CLI"));
       p.parse();

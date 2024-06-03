@@ -938,9 +938,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@puppeteer/browsers@npm:2.2.2":
-  version: 2.2.2
-  resolution: "@puppeteer/browsers@npm:2.2.2"
+"@puppeteer/browsers@npm:2.2.3":
+  version: 2.2.3
+  resolution: "@puppeteer/browsers@npm:2.2.3"
   dependencies:
     debug: "npm:4.3.4"
     extract-zip: "npm:2.0.1"
@@ -952,7 +952,7 @@ __metadata:
     yargs: "npm:17.7.2"
   bin:
     browsers: lib/cjs/main-cli.js
-  checksum: 10c0/4c49b53da60b4c7e0b08a6cc4c12debc5f750e7cbedecf6ae2966b7cfde4bee4d11c798f5c536340f9e351d209eeccef986e1e86881ae8f69daef54bffe78d03
+  checksum: 10c0/0d3442b44daf7469dba4ab641bae1450c7616818f1da465f5bbd96de14afd78e86b5015d3f28a2f06401f4b5bc09a72a7fd2ad77f1b51e4b54a3de4a0bcc82ea
   languageName: node
   linkType: hard
 
@@ -1308,6 +1308,15 @@ __metadata:
   version: 1.19.1
   resolution: "@types/prettier@npm:1.19.1"
   checksum: 10c0/41b21f8cfcb3a6816e4a71b8899f7f69013ed1edcf1aa4729db392c97c5288fc293703fee228ce09331cff231294e76ad3aabf264527bc9f7b8aceac5f3a5ee8
+  languageName: node
+  linkType: hard
+
+"@types/puppeteer@npm:^7.0.4":
+  version: 7.0.4
+  resolution: "@types/puppeteer@npm:7.0.4"
+  dependencies:
+    puppeteer: "npm:*"
+  checksum: 10c0/292fc558771336554a7c545095fc4c786a53edcb41ad61361b8afa8860a58b515f96a935e922333cca11fde4eb09d494ab575a3fac67333cda4d6facefd1ebba
   languageName: node
   linkType: hard
 
@@ -2170,16 +2179,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromium-bidi@npm:0.5.17":
-  version: 0.5.17
-  resolution: "chromium-bidi@npm:0.5.17"
+"chromium-bidi@npm:0.5.19":
+  version: 0.5.19
+  resolution: "chromium-bidi@npm:0.5.19"
   dependencies:
     mitt: "npm:3.0.1"
     urlpattern-polyfill: "npm:10.0.0"
     zod: "npm:3.22.4"
   peerDependencies:
     devtools-protocol: "*"
-  checksum: 10c0/1d503c3af43f1e9e2b9d0a61a88ab67d90cc72ec823ec40a62c25777532d887e51f672046ea41d853754b52a3aa933f024bd69abfd85586396e06460b11481a0
+  checksum: 10c0/b48b1eb0a6ea029abf72d0e474b99d421d2e234eb92f743d592804b0130909f942b0dbd86147ba22d7d2d84e4345f4a9994030fcdac83ebee7a8892f575b7539
   languageName: node
   linkType: hard
 
@@ -2619,10 +2628,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devtools-protocol@npm:0.0.1262051":
-  version: 0.0.1262051
-  resolution: "devtools-protocol@npm:0.0.1262051"
-  checksum: 10c0/fbc33543786cc53ed5a2b1d004a9cd2c1ab07b546e45669603c04c4fb6d3acca1e7d6d31a10ce1f2fdb583e2559171b8303da801f3a8688305ba3ad2c8e0a07f
+"devtools-protocol@npm:0.0.1286932":
+  version: 0.0.1286932
+  resolution: "devtools-protocol@npm:0.0.1286932"
+  checksum: 10c0/2a8d0bd15ce77ca7bce1dfc4b019d968cc4a81753f95454d7b0b9b53d724d6ac88c9e1d228d01a23a268c526e992539e0c880aa8559c5d4468cdb0313e815bd0
   languageName: node
   linkType: hard
 
@@ -2658,7 +2667,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.0.2, dotenv@npm:^16.0.3":
+"dotenv@npm:^16.0.2, dotenv@npm:^16.0.3, dotenv@npm:^16.4.5":
   version: 16.4.5
   resolution: "dotenv@npm:16.4.5"
   checksum: 10c0/48d92870076832af0418b13acd6e5a5a3e83bb00df690d9812e94b24aff62b88ade955ac99a05501305b8dc8f1b0ee7638b18493deb6fe93d680e5220936292f
@@ -3495,6 +3504,56 @@ __metadata:
   checksum: 10c0/e951259d8cd2e0d196c72ec711add7115d42eb9a8146c8eeda5b8d3ac91e5dd816b9cd68920726d9fd4490368e7ed86e9c423f40db87e2d8dfafa00fa17c3a31
   languageName: node
   linkType: hard
+
+"h2to-cli@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "h2to-cli@workspace:."
+  dependencies:
+    "@types/eslint": "npm:^8"
+    "@types/figlet": "npm:^1"
+    "@types/fs-extra": "npm:^5.0.5"
+    "@types/glob": "npm:^7.1.3"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^18.16.6"
+    "@types/pg": "npm:^8"
+    "@types/prettier": "npm:^1.19.1"
+    "@types/puppeteer": "npm:^7.0.4"
+    "@types/ramda": "npm:^0"
+    "@types/rimraf": "npm:^2.0.4"
+    "@typescript-eslint/eslint-plugin": "npm:^6.7.0"
+    "@typescript-eslint/parser": "npm:^6.7.0"
+    commander: "npm:^12.0.0"
+    dotenv: "npm:^16.4.5"
+    eslint: "npm:~8.57.0"
+    eslint-config-prettier: "npm:^8.3.0"
+    eslint-plugin-prettier: "npm:^5.0.0"
+    execa: "npm:^5.1.1"
+    figlet: "npm:^1.7.0"
+    fp-ts: "npm:^2.16.5"
+    fs-extra: "npm:^7.0.1"
+    glob: "npm:^7.1.6"
+    handlebars: "npm:^4.7.8"
+    jest: "npm:^29.4.3"
+    ora: "npm:^5.4.1"
+    pg: "npm:^8.11.5"
+    prettier: "npm:^3.2.5"
+    puppeteer: "npm:^22.10.0"
+    ramda: "npm:^0.29.1"
+    rimraf: "npm:^2.7.1"
+    sanitize-filename: "npm:^1.6.3"
+    ts-jest: "npm:^29.0.5"
+    ts-node: "npm:^10.9.2"
+    ts-pattern: "npm:^5.1.1"
+    tsc-alias: "npm:^1.8.8"
+    tsconfig-paths: "npm:^4.2.0"
+    type-fest: "npm:^4.15.0"
+    typedoc: "npm:^0.25.13"
+    typescript: "npm:^5.4.5"
+    yl-ddd-ts: "npm:^2.0.1"
+  bin:
+    h2to-cli: ./dist/cjs/app.js
+  languageName: unknown
+  linkType: soft
 
 "handlebars@npm:^4.7.8":
   version: 4.7.8
@@ -4486,7 +4545,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json5@npm:^2.2.3":
+"json5@npm:^2.2.2, json5@npm:^2.2.3":
   version: 2.2.3
   resolution: "json5@npm:2.2.3"
   bin:
@@ -4912,7 +4971,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.2.5":
+"minimist@npm:^1.2.5, minimist@npm:^1.2.6":
   version: 1.2.8
   resolution: "minimist@npm:1.2.8"
   checksum: 10c0/19d3fcdca050087b84c2029841a093691a91259a47def2f18222f41e7645a0b7c44ef4b40e88a1e58a40c84d2ef0ee6047c55594d298146d0eb3f6b737c20ce6
@@ -5857,30 +5916,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:22.6.5":
-  version: 22.6.5
-  resolution: "puppeteer-core@npm:22.6.5"
+"puppeteer-core@npm:22.10.0":
+  version: 22.10.0
+  resolution: "puppeteer-core@npm:22.10.0"
   dependencies:
-    "@puppeteer/browsers": "npm:2.2.2"
-    chromium-bidi: "npm:0.5.17"
+    "@puppeteer/browsers": "npm:2.2.3"
+    chromium-bidi: "npm:0.5.19"
     debug: "npm:4.3.4"
-    devtools-protocol: "npm:0.0.1262051"
-    ws: "npm:8.16.0"
-  checksum: 10c0/c352825569782fdd2f2f32d062c1f76c0d403a74bfdd0382926d24a45481ee607eacbb4d7cabb15dad02bae5419253163187699c81f0a90c05eb754a38c09a38
+    devtools-protocol: "npm:0.0.1286932"
+    ws: "npm:8.17.0"
+  checksum: 10c0/3332dd764bdc8aa651a43a1dc7b8cc098a6dadaa4814dd4749a56437cdb280271b8679d9fb6736575b556f08f36741f4a1d28c9c5090393edd35233c6ea1562f
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^22.6.5":
-  version: 22.6.5
-  resolution: "puppeteer@npm:22.6.5"
+"puppeteer@npm:*, puppeteer@npm:^22.10.0":
+  version: 22.10.0
+  resolution: "puppeteer@npm:22.10.0"
   dependencies:
-    "@puppeteer/browsers": "npm:2.2.2"
+    "@puppeteer/browsers": "npm:2.2.3"
     cosmiconfig: "npm:9.0.0"
-    devtools-protocol: "npm:0.0.1262051"
-    puppeteer-core: "npm:22.6.5"
+    devtools-protocol: "npm:0.0.1286932"
+    puppeteer-core: "npm:22.10.0"
   bin:
     puppeteer: lib/esm/puppeteer/node/cli.js
-  checksum: 10c0/bd79078e8b84702a4ecbea2fb7bead2024f828aae530636aff97e2bba4dfb6f9f4f737f886e7681b92bccb96315c1f23490d62022b6d73a1dc04cadb6344c77f
+  checksum: 10c0/28b155641ae0ab51d64d38fa17c9822179b70183d10944ace67e87f9c66f8e20384ac6e502c5db4ede0a4356950caef0c53e1e60cbf33fd27beb86ba802d8957
   languageName: node
   linkType: hard
 
@@ -6182,6 +6241,15 @@ __metadata:
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: 10c0/7e3c8b2e88a1841c9671094bbaeebd94448111dd90a81a1f606f3f67708a6ec57763b3b47f06da09fc6054193e0e6709e77325415dc8422b04497a8070fa02d4
+  languageName: node
+  linkType: hard
+
+"sanitize-filename@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "sanitize-filename@npm:1.6.3"
+  dependencies:
+    truncate-utf8-bytes: "npm:^1.0.0"
+  checksum: 10c0/16ff47556a6e54e228c28db096bedd303da67b030d4bea4925fd71324932d6b02c7b0446f00ad33987b25b6414f24ae968e01a1a1679ce599542e82c4b07eb1f
   languageName: node
   linkType: hard
 
@@ -6502,6 +6570,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"strip-bom@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "strip-bom@npm:3.0.0"
+  checksum: 10c0/51201f50e021ef16672593d7434ca239441b7b760e905d9f33df6e4f3954ff54ec0e0a06f100d028af0982d6f25c35cd5cda2ce34eaebccd0250b8befb90d8f1
+  languageName: node
+  linkType: hard
+
 "strip-bom@npm:^4.0.0":
   version: 4.0.0
   resolution: "strip-bom@npm:4.0.0"
@@ -6723,6 +6798,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"truncate-utf8-bytes@npm:^1.0.0":
+  version: 1.0.2
+  resolution: "truncate-utf8-bytes@npm:1.0.2"
+  dependencies:
+    utf8-byte-length: "npm:^1.0.1"
+  checksum: 10c0/af2b431fc4314f119b551e5fccfad49d4c0ef82e13ba9ca61be6567801195b08e732ce9643542e8ad1b3df44f3df2d7345b3dd34f723954b6bb43a14584d6b3c
+  languageName: node
+  linkType: hard
+
 "ts-api-utils@npm:^1.0.1":
   version: 1.3.0
   resolution: "ts-api-utils@npm:1.3.0"
@@ -6833,6 +6917,17 @@ __metadata:
   bin:
     tsc-alias: dist/bin/index.js
   checksum: 10c0/02d0e3309f5b4d5c2dfc09ddb1192faa75108025e37d51f85dd7cfaab1ebe69cd50a6ed17d2e5d692ddc406455c1b17dfc056ca6ac56f587cba7b63993de251c
+  languageName: node
+  linkType: hard
+
+"tsconfig-paths@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "tsconfig-paths@npm:4.2.0"
+  dependencies:
+    json5: "npm:^2.2.2"
+    minimist: "npm:^1.2.6"
+    strip-bom: "npm:^3.0.0"
+  checksum: 10c0/09a5877402d082bb1134930c10249edeebc0211f36150c35e1c542e5b91f1047b1ccf7da1e59babca1ef1f014c525510f4f870de7c9bda470c73bb4e2721b3ea
   languageName: node
   linkType: hard
 
@@ -7119,6 +7214,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"utf8-byte-length@npm:^1.0.1":
+  version: 1.0.5
+  resolution: "utf8-byte-length@npm:1.0.5"
+  checksum: 10c0/e69bda3299608f4cc75976da9fb74ac94801a58b9ca29fdad03a20ec952e7477d7f226c12716b5f36bd4cff8151d1d152d02ee1df3752f017d4b2c725ce3e47a
+  languageName: node
+  linkType: hard
+
 "util-deprecate@npm:^1.0.1":
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
@@ -7307,9 +7409,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.16.0":
-  version: 8.16.0
-  resolution: "ws@npm:8.16.0"
+"ws@npm:8.17.0":
+  version: 8.17.0
+  resolution: "ws@npm:8.17.0"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -7318,7 +7420,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10c0/a7783bb421c648b1e622b423409cb2a58ac5839521d2f689e84bc9dc41d59379c692dd405b15a997ea1d4c0c2e5314ad707332d0c558f15232d2bc07c0b4618a
+  checksum: 10c0/55241ec93a66fdfc4bf4f8bc66c8eb038fda2c7a4ee8f6f157f2ca7dc7aa76aea0c0da0bf3adb2af390074a70a0e45456a2eaf80e581e630b75df10a64b0a990
   languageName: node
   linkType: hard
 
@@ -7479,52 +7581,6 @@ __metadata:
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
   languageName: node
   linkType: hard
-
-"yy-cli@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "yy-cli@workspace:."
-  dependencies:
-    "@types/eslint": "npm:^8"
-    "@types/figlet": "npm:^1"
-    "@types/fs-extra": "npm:^5.0.5"
-    "@types/glob": "npm:^7.1.3"
-    "@types/jest": "npm:^29.5.12"
-    "@types/node": "npm:^18.16.6"
-    "@types/pg": "npm:^8"
-    "@types/prettier": "npm:^1.19.1"
-    "@types/ramda": "npm:^0"
-    "@types/rimraf": "npm:^2.0.4"
-    "@typescript-eslint/eslint-plugin": "npm:^6.7.0"
-    "@typescript-eslint/parser": "npm:^6.7.0"
-    commander: "npm:^12.0.0"
-    eslint: "npm:~8.57.0"
-    eslint-config-prettier: "npm:^8.3.0"
-    eslint-plugin-prettier: "npm:^5.0.0"
-    execa: "npm:^5.1.1"
-    figlet: "npm:^1.7.0"
-    fp-ts: "npm:^2.16.5"
-    fs-extra: "npm:^7.0.1"
-    glob: "npm:^7.1.6"
-    handlebars: "npm:^4.7.8"
-    jest: "npm:^29.4.3"
-    ora: "npm:^5.4.1"
-    pg: "npm:^8.11.5"
-    prettier: "npm:^3.2.5"
-    puppeteer: "npm:^22.6.5"
-    ramda: "npm:^0.29.1"
-    rimraf: "npm:^2.7.1"
-    ts-jest: "npm:^29.0.5"
-    ts-node: "npm:^10.9.2"
-    ts-pattern: "npm:^5.1.1"
-    tsc-alias: "npm:^1.8.8"
-    type-fest: "npm:^4.15.0"
-    typedoc: "npm:^0.25.13"
-    typescript: "npm:^5.4.5"
-    yl-ddd-ts: "npm:^2.0.1"
-  bin:
-    yy-cli: ./dist/cjs/app.js
-  languageName: unknown
-  linkType: soft
 
 "zod@npm:3.22.4":
   version: 3.22.4

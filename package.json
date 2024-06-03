@@ -1,5 +1,5 @@
 {
-  "name": "yy-cli",
+  "name": "h2to-cli",
   "version": "1.0.0",
   "description": "cli for yycorp project",
   "main": "./dist/cjs/app.js",
@@ -9,11 +9,15 @@
   "bin": "./dist/cjs/app.js",
   "scripts": {
     "build": "rimraf dist && tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
-    "run": "node dist/app.js",
+    "run": "node dist/cjs/app.js",
     "test": "jest --config jest.config.js",
-    "test-run": "ts-node --project tsconfig.json -r tsconfig-paths/register app.ts",
+    "test-run": "IS_TEST=true ts-node --project tsconfig.json -r tsconfig-paths/register app.ts",
     "doc": "typedoc --out docs app.ts"
   },
+  "files": [
+    "impl/resource",
+    "package.json"
+  ],
   "devDependencies": {
     "@types/eslint": "^8",
     "@types/figlet": "^1",
@@ -35,12 +39,15 @@
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
+    "tsconfig-paths": "^4.2.0",
     "type-fest": "^4.15.0",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@types/puppeteer": "^7.0.4",
     "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
     "execa": "^5.1.1",
     "figlet": "^1.7.0",
     "fp-ts": "^2.16.5",
@@ -49,9 +56,10 @@
     "handlebars": "^4.7.8",
     "ora": "^5.4.1",
     "pg": "^8.11.5",
-    "puppeteer": "^22.6.5",
+    "puppeteer": "^22.10.0",
     "ramda": "^0.29.1",
     "rimraf": "^2.7.1",
+    "sanitize-filename": "^1.6.3",
     "ts-pattern": "^5.1.1",
     "yl-ddd-ts": "^2.0.1"
   },

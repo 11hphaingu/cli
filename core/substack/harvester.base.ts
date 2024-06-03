@@ -5,7 +5,7 @@ import { TE, pipe } from "yl-ddd-ts";
 
 export type CheckIfCatchedAlready = (id: string) => TaskEither<Error, boolean>;
 
-export type Login = () => TaskEither<Error, void>;
+export type Login = (havestor: SubstackHarvestor) => TaskEither<Error, void>;
 
 export type Post = {
   id: string;
@@ -14,21 +14,32 @@ export type Post = {
   audio: string[];
 };
 
-export type MarkAsProcessed = (id: string) => TaskEither<Error, void>;
+export type MarkAsProcessed = (
+  id: string,
+  title: string,
+) => TaskEither<Error, void>;
 
-export type DownloadAudio = (audio: string) => TaskEither<Error, void>;
-
-export type RetrievePage = (
-  publisherUrl: string,
-) => (pagParam: { page: number; limit: number }) => TaskEither<Error, Post[]>;
-
-export type WritePdf = (post: Post) => TaskEither<Error, void>;
+export type DownloadAudio = (
+  id: string,
+) => (audio: string) => TaskEither<Error, void>;
 
 export interface SubstackHarvestor {
   publisherUrl: string;
+  pubId: string;
 }
+export type RetrievePage = (
+  harvestor: SubstackHarvestor,
+) => (pagParam: { page: number; limit: number }) => TaskEither<Error, Post[]>;
 
-export const harvest: Reader<
+export type WritePdf = (
+  harvestor: SubstackHarvestor,
+) => (post: Post) => TaskEither<Error, void>;
+export type PageNum = number;
+export const PageNumTrait = {
+  isInfinity: (page: PageNum) => page === PageNumTrait.MAX_PAGE,
+  MAX_PAGE: -1,
+};
+export const Harvest: Reader<
   {
     // screaming that you need to cache the already harvested article
     // and stored credential in a storage
@@ -39,7 +50,11 @@ export const harvest: Reader<
     markAsProcessed: MarkAsProcessed;
     downloadAudio: DownloadAudio;
   },
-  (publisherUrl: string, limit: number) => TaskEither<Error, any>
+  (
+    substackHavestor: SubstackHarvestor,
+    limit: number,
+    maxPage: number,
+  ) => TaskEither<Error, any>
 > =
   ({
     checkIfCatchedAlready,
@@ -49,47 +64,73 @@ export const harvest: Reader<
     markAsProcessed,
     downloadAudio,
   }) =>
-  (publisherUrl, limit) => {
-    const loopOverTheArticles = LoopableTrait.ofTE(
-      (param: { page: number; limit: number }) =>
+  (substackHavestor, limit, maxPage) => {
+    const loopOverTheArticles = (posts: Post[]) => {
+      return LoopableTrait.ofTE<{
+        results: any[];
+        nextIndex: number;
+      }>((params: { idx: number; results: any[] }) =>
+        pipe(
+          posts[params.idx].id,
+          checkIfCatchedAlready,
+          TE.chain((isProcess) =>
+            isProcess
+              ? TE.right(null)
+              : pipe(
+                  posts[params.idx],
+                  writePdf(substackHavestor),
+                  TE.bindTo("pdf"),
+                  TE.chain(() =>
+                    markAsProcessed(
+                      posts[params.idx].id,
+                      posts[params.idx].title,
+                    ),
+                  ),
+                  TE.bind("audio", () =>
+                    pipe(
+                      posts[params.idx].audio,
+                      TE.traverseArray(downloadAudio(posts[params.idx].id)),
+                    ),
+                  ),
+                ),
+          ),
+          TE.map((r) => ({
+            results: [...params.results, r],
+            nextIndex: params.idx + 1,
+          })),
+        ),
+      )(
+        (r) => r.nextIndex < posts.length,
+        (r) => [{ idx: r.nextIndex, results: r.results }],
+      );
+    };
+    const loopOverThePages = LoopableTrait.ofTE(
+      (param: { page: PageNum; limit: number }) =>
         pipe(
           { page: param.page, limit: param.limit },
-          retrievePage(publisherUrl),
-          TE.chain(
-            TE.traverseArray((post) => {
-              return pipe(
-                post.id,
-                checkIfCatchedAlready,
-                TE.chain((isProcess) =>
-                  isProcess
-                    ? TE.right(null)
-                    : pipe(
-                        post,
-                        writePdf,
-                        TE.bindTo("pdf"),
-                        TE.bind("audio", () =>
-                          pipe(post.audio, TE.traverseArray(downloadAudio)),
-                        ),
-                        TE.chain(() => markAsProcessed(post.id)),
-                      ),
-                ),
-              );
+          retrievePage(substackHavestor),
+          TE.chain((posts) =>
+            LoopableTrait.loop(loopOverTheArticles(posts))({
+              idx: 0,
+              results: [],
             }),
           ),
-          TE.map((results) => ({
+          TE.map((result) => ({
             nextPage: param.page + 1,
-            result: results,
+            result: result?.results,
           })),
         ),
     )(
-      (result) => result.result.length > 0,
+      (result) =>
+        (result?.result?.length || 0) > 0 &&
+        (PageNumTrait.isInfinity(maxPage) || result.nextPage <= maxPage),
       (r) => [{ page: r.nextPage, limit }],
     );
     return pipe(
-      login(),
+      login(substackHavestor),
       TE.bindTo("login"),
       TE.bind("printsPdf", () =>
-        LoopableTrait.loop(loopOverTheArticles)({ page: 0, limit }),
+        LoopableTrait.loop(loopOverThePages)({ page: 0, limit }),
       ),
     );
   };

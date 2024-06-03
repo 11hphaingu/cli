@@ -1,5 +1,8 @@
 node_modules
 dist
+data
+cookies.json
+.env
 .yarn
 __test__/mockProject/**/*
 !__test__/mockProject/package.json

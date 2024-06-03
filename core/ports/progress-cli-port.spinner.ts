@@ -50,7 +50,7 @@ export const ProgressSpinnerTrait: ProgressTrait<ProgressSpinner> = {
   updateProgress: (update) => (progress) => {
     // effectful all
     return pipe(
-      update.color,
+      update.color || Option.none,
       Option.match(
         () => IO.of(progress),
         (color) => () => {
@@ -60,7 +60,7 @@ export const ProgressSpinnerTrait: ProgressTrait<ProgressSpinner> = {
       ),
       IO.flatMap((p) =>
         pipe(
-          update.currentStep,
+          update.currentStep || Option.none,
           Option.match(
             () => IO.of(p),
             (c) => () => {
@@ -80,7 +80,7 @@ export const ProgressSpinnerTrait: ProgressTrait<ProgressSpinner> = {
       ),
       IO.flatMap((p) =>
         pipe(
-          update.currentJob,
+          update.currentJob || Option.none,
           Option.match(
             () => IO.of(p),
             (c) => () => {

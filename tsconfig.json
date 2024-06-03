@@ -12,7 +12,8 @@
     "outDir": "./dist/cjs",
     "declaration": true,
     "lib": [
-      "es2019"
+      "es2019",
+      "DOM"
     ],
     "resolveJsonModule": true,
     "types": [

@@ -38,6 +38,7 @@ export const getPackageJsonGeneral = (
             execa: "^5.1.1",
             figlet: "^1.7.0",
             ora: "^5.4.1",
+            dotenv: "^16.4.5",
             glob: "^7.1.6",
             handlebars: "^4.7.8",
           },

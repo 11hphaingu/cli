@@ -1,12 +1,12 @@
 import {
   CheckIfCatchedAlready,
   DownloadAudio,
+  Harvest,
   Login,
   MarkAsProcessed,
   Post,
   RetrievePage,
   WritePdf,
-  harvest,
 } from "core/substack/harvester.base";
 import { Either, TE, absordTE, pipe } from "yl-ddd-ts";
 import { aufn } from "yl-ddd-ts";
@@ -27,8 +27,8 @@ describe("test havester core", () => {
     processed.push(id);
     return absordTE(TE.right(null));
   };
-  const downloadAudio: DownloadAudio = () => absordTE(TE.right(null));
-  const getPdf: WritePdf = () => absordTE(TE.right(null));
+  const downloadAudio: DownloadAudio = () => () => absordTE(TE.right(null));
+  const getPdf: WritePdf = () => () => absordTE(TE.right(null));
   const retrievePage: RetrievePage =
     () =>
     ({ page, limit }) => {
@@ -48,14 +48,14 @@ describe("test havester core", () => {
     };
   it("test havest", async () => {
     const LIMIT = 10;
-    const result = await harvest({
+    const result = await Harvest({
       checkIfCatchedAlready,
       login,
       retrievePage,
       writePdf: getPdf,
       markAsProcessed,
       downloadAudio,
-    })("https://substack.com", LIMIT)();
+    })({ publisherUrl: "https://substack.com", pubId: "substack" }, LIMIT)();
     pipe(
       result,
       Either.match(

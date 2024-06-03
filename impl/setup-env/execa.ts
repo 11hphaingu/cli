@@ -16,7 +16,7 @@ import {
   UpdateDeps,
   UpdateEslint,
 } from "core/setup-env/base";
-import { absordTE } from "yl-ddd-ts/logic";
+import { absordTE } from "yl-ddd-ts";
 import { executeSetupEslint } from "core/setup-env/setup-eslint";
 import {
   UpdateTsConfigFile,

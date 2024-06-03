@@ -42,6 +42,16 @@ export const loop =
             ),
           )();
         }
+        const ultimateResult = pipe(
+          result,
+          Either.match(
+            (e) => {
+              throw e;
+            },
+            (r) => r,
+          ),
+        );
+        return ultimateResult.value;
       },
       (e) => e as Error,
     );
