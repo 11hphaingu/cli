@@ -1,4 +1,4 @@
-import { PgPort, getPgPort } from "core/ports/pg-port";
+import { PgPort } from "core/ports/pg-port";
 import {
   CheckIfCatchedAlready,
   DownloadAudio,
@@ -13,7 +13,7 @@ import sanitize from "sanitize-filename";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
-import { Option, Reader, TE, absordTE, pipe } from "yl-ddd-ts";
+import { Option, Reader, TE, absordTE, pipe, flow, Either } from "yl-ddd-ts";
 import puppeteer, { Browser, Page } from "puppeteer";
 import { Progress, ProgressTrait } from "core/ports/progress-cli-port";
 
@@ -160,33 +160,54 @@ export const WritePdfWithPuppeteer: Reader.Reader<
   ({ page, progress, progressTrait, chunkToJob }) =>
   (havester: SubstackHarvestor) =>
   (post: Post) =>
-    absordTE(
-      TE.tryCatch(
-        async () => {
-          progressTrait.updateProgress({
-            currentJob: Option.some(chunkToJob(`download ${post.title} start`)),
-            currentStep: Option.some(2),
-            color: Option.some("red"),
-          })(progress)();
-          await page.goto(post.canonicalUrl, { waitUntil: "networkidle2" });
-          await page.waitForSelector("h1.post-title");
-          await page.pdf({
-            path: `${process.cwd()}/data/${havester.pubId}/${sanitize(post.title)}.pdf`, // Output file path
-            format: "A4", // Paper format
-            printBackground: true, // Include background graphics
-            margin: {
-              top: "20mm",
-              right: "20mm",
-              bottom: "20mm",
-              left: "20mm",
-            },
-          });
-          progressTrait.updateProgress({
-            currentJob: Option.some(
-              chunkToJob(`download ${post.title} finished`),
+    pipe(
+      // check folder exist if not create one
+      path.resolve(process.cwd(), "data", havester.pubId),
+      TE.fromPredicate(fs.existsSync, (p) => p),
+      TE.orElse(
+        flow(
+          (p) =>
+            Either.tryCatch(
+              () => {
+                fs.mkdirSync(p, { recursive: true });
+                return p;
+              },
+              (e) => e,
             ),
-          })(progress)();
-        },
-        (e) => e,
+          TE.fromEither,
+        ),
       ),
+      TE.chain((storePath) =>
+        TE.tryCatch(
+          async () => {
+            progressTrait.updateProgress({
+              currentJob: Option.some(
+                chunkToJob(`download ${post.title} start`),
+              ),
+              currentStep: Option.some(2),
+              color: Option.some("red"),
+            })(progress)();
+            await page.goto(post.canonicalUrl, { waitUntil: "networkidle2" });
+            await page.waitForSelector("h1.post-title");
+            await page.pdf({
+              path: `${storePath}/${sanitize(post.title)}.pdf`, // Output file path
+              format: "A4", // Paper format
+              printBackground: true, // Include background graphics
+              margin: {
+                top: "20mm",
+                right: "20mm",
+                bottom: "20mm",
+                left: "20mm",
+              },
+            });
+            progressTrait.updateProgress({
+              currentJob: Option.some(
+                chunkToJob(`download ${post.title} finished`),
+              ),
+            })(progress)();
+          },
+          (e) => e,
+        ),
+      ),
+      absordTE,
     );
