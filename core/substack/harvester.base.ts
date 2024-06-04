@@ -53,7 +53,7 @@ export const Harvest: Reader<
   (
     substackHavestor: SubstackHarvestor,
     limit: number,
-    maxPage: number,
+    maxPage?: number,
   ) => TaskEither<Error, any>
 > =
   ({
@@ -64,7 +64,7 @@ export const Harvest: Reader<
     markAsProcessed,
     downloadAudio,
   }) =>
-  (substackHavestor, limit, maxPage) => {
+  (substackHavestor, limit, maxPage = PageNumTrait.MAX_PAGE) => {
     const loopOverTheArticles = (posts: Post[]) => {
       return LoopableTrait.ofTE<{
         results: any[];
