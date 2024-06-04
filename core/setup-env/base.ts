@@ -2,11 +2,6 @@ import { Option, TE } from "yl-ddd-ts";
 import { executeSetupEslint } from "./setup-eslint";
 
 /**
- * Module representing the setup for a development environment.
- * @module setup-development-environment
- */
-
-/**
  * Enum representing different types of projects.
  * according to the environment that run the js
  * code

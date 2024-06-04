@@ -2,9 +2,10 @@
 
 import { Either, pipe } from "yl-ddd-ts";
 
-export * from "./core";
+import * as setupEnv from "./core/setup-env";
+import { harvester } from "core/substack";
 import * as port from "./ports";
-export { port };
+export { port, setupEnv, harvester };
 
 const commanderExe = port.commander.commanderInstance();
 

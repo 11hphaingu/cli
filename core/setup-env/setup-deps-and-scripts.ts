@@ -3,16 +3,15 @@ import { PkgCfg, ProjectSpecificTypes } from "./base";
 import { mergeRight } from "ramda";
 import { match } from "ts-pattern";
 
-/*
+/**
  * Smart constructor to generate the PkgCfg instance
  * based on the projectType
  * @param projectType - The specific type of the project (e.g., CLI, module).
- * @returns {PkgCfg} A `PkgCfg` object containing the merged package.json configuration.
+ * @returns A `PkgCfg` object containing the merged package.json configuration.
  **/
-
-export const getPackageJsonGeneral = (
+export function getPackageJsonGeneral(
   projectType: ProjectSpecificTypes,
-): PkgCfg => {
+): PkgCfg {
   const cjsBuildFolder = "dist/cjs";
   return pipe(
     {
@@ -79,4 +78,4 @@ export const getPackageJsonGeneral = (
         .otherwise(() => ({})),
     ),
   );
-};
+}
