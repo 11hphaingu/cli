@@ -64,5 +64,8 @@
     "ts-pattern": "^5.1.1",
     "yl-ddd-ts": "^2.0.1"
   },
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.1.1",
+  "engines": {
+    "node": "~18.17.0"
+  }
 }
