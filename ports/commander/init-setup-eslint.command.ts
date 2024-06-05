@@ -16,6 +16,11 @@ export const initSetupEslintCommand = (program: Command) => {
           "tsconfig.json",
         )
         .option("--project-type [node|browser]", "your project type", "node")
+        .option(
+          "--project-specific-type [cli|module|service|web]",
+          "your domain project type",
+          "service",
+        )
         .option("--no-ts", "dont use ts ?")
         .option(
           "--has-declaration-map",
