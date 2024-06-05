@@ -1,6 +1,6 @@
 module.exports = {
   parser: "{{parser}}",
-  parserOptions: {{parserOpts}},
+  parserOptions: {{{toJSON parserOpts}}},
   plugins: ["@typescript-eslint/eslint-plugin"],
   extends: [
     "plugin:@typescript-eslint/recommended",

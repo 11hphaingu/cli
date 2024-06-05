@@ -94,7 +94,7 @@ export const executeSetupEslint: Reader.Reader<
         parser: whichParser,
         buildFolder: setupEnvWork.buildDir,
         testFolder: setupEnvWork.testDir,
-        parseOpts,
+        parseOpts: parseOpts,
       }),
       TE.bindTo("updateEslint"),
       TE.bind("updateDeps", () => updateDeps(deps)),
