@@ -16,7 +16,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
+          registry-url: 'https://registry.npmjs.org/'
           node-version: '18.17.0'
+          cache: 'npm'
       - run: |
           corepack enable
           corepack prepare yarn@4.1.1 --activate
@@ -30,13 +32,19 @@ jobs:
       - name: Publish to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public
-
+        run: |
+          echo $NODE_AUTH_TOKEN
+          npm publish
+      - name: Get version from package.json
+        id: version 
+        run: |
+          echo "tag=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ steps.version.outputs.tag}}
         run: |
           curl -X POST \
             -H "Content-Type: application/json" \
-            -d "{\"content\": \"New version of the CLI tool has been published to NPM.\"}" \
+            -d "{\"content\": \"New version $TAG of the CLI tool has been published to NPM.\"}" \
             $DISCORD_WEBHOOK_URL
