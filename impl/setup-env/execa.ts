@@ -23,6 +23,7 @@ import {
   ExcuteSetupTypescript,
 } from "core/setup-env/setup-typescript";
 import { getPackageJsonGeneral } from "core/setup-env/setup-deps-and-scripts";
+import path from "path";
 
 const updateDepsWith =
   (projectPath: string, onStdOut: (chunk: any) => void): UpdateDeps =>
@@ -38,13 +39,18 @@ const setupEslint: SetupEslint = ({ setupEnvWork, onStdOut }) => {
   const updateEslint: UpdateEslint = (params) => {
     return buildFromTemplateFile(
       setupEnvWork.projectPath,
-      "./resource/eslint-config-template.hbs",
+      path.resolve(
+        __dirname,
+        IS_TEST
+          ? "../resource/eslint-config-template.hbs"
+          : "../../../../impl/resource/eslinst-config-template.hbs",
+      ),
       "./eslintrc.js",
       {
         parser: params.parser,
         buildFolder: params.buildFolder,
         testFolder: params.testFolder,
-        parseOpts: params.parseOpts,
+        parserOpts: params.parseOpts,
       },
     );
   };
@@ -55,15 +61,22 @@ const setupEslint: SetupEslint = ({ setupEnvWork, onStdOut }) => {
   })(setupEnvWork);
 };
 
+const IS_TEST = process.env.IS_TEST;
+
 const setupTypescript: SetupTypescript = ({ setupEnvWork, onStdOut }) => {
   const updateTsConfigFile: UpdateTsConfigFile = (params) => {
     return buildFromTemplateFile(
       setupEnvWork.projectPath,
-      "./resource/tsconfig.hbs",
+      path.resolve(
+        __dirname,
+        IS_TEST
+          ? "../resource/tsconfig.hbs"
+          : "../../../../impl/resource/tsconfig.hbs",
+      ),
       "./tsconfig.json",
       {
         buildDir: setupEnvWork.buildDir,
-        hasDeclarationMap: params.declarationMapping,
+        hasDeclarationMap: !!params.declarationMapping,
         isSubModule: params.isSubModule,
         testDir: setupEnvWork.testDir,
         includePaths: params.includePaths,
@@ -86,6 +99,19 @@ const setupProjectPackages: SetupProjectPackage = ({
     getPackageJsonGeneral,
     writePkgJsonFile(setupEnvWork.projectPath),
     TaskEither.chain(() => yarnInstall(setupEnvWork.projectPath, onStdOut)),
+    TaskEither.chain(() =>
+      buildFromTemplateFile(
+        setupEnvWork.projectPath,
+        path.resolve(
+          __dirname,
+          IS_TEST
+            ? "../resource/jest.config.js.hbs"
+            : "../../../../impl/resource/jest.config.js.hbs",
+        ),
+        "./jest.config.js",
+        {},
+      ),
+    ),
   );
 };
 

@@ -102,13 +102,12 @@ export const yarnInstall: YarnInstall = (
 
 export const buildFromTemplateFile: BuildFileFromTpl = <T = UnknownRecord>(
   projectPath: string,
-  dirNameRltTemplatePath: string,
+  templatePath: string,
   prjRltOutDirPath: string = process.cwd(),
   params: T,
 ) => {
-  const TEMPLATE_PATH = path.join(__dirname, dirNameRltTemplatePath);
   return pipe(
-    TEMPLATE_PATH,
+    templatePath,
     FileSystem.readFile,
     TaskEither.chainW(
       flow(flip(HBSTemplatePort.compile)(params), TaskEither.fromEither),
