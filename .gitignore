@@ -6,3 +6,4 @@ cookies.json
 .yarn
 __test__/mockProject/**/*
 !__test__/mockProject/package.json
+act.secrets

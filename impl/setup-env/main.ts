@@ -46,7 +46,7 @@ export const prepareTsAndEslWith = (
           progressTrait.updateProgress({
             currentJob: Option.some(`setup eslint: ${chunk}`),
             currentStep: Option.none,
-            color: Option.some("orange"),
+            color: Option.some("yellow"),
           })(params.progress)(),
       }),
     ),

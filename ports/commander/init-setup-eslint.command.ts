@@ -7,7 +7,7 @@ export const initSetupEslintCommand = (program: Command) => {
     () =>
       program
         .command("setup-eslint-ts")
-        .argument("[project-path]", ".")
+        .argument("[project-path]", "project path", ".")
         .option("-bD, --build-dir [string]", "path of build Dir", "dist")
         .option("-tD, --test-dir [string]", "path of test Dir", "__test__")
         .option(
@@ -37,6 +37,7 @@ export const initSetupEslintCommand = (program: Command) => {
         )
         .description("setup typescript and eslint for nodejs project")
         .action((projectPath, opts) => {
+          console.log("projectPath", projectPath);
           prepareTsAndEslWith(projectPath, opts)().then(
             Either.match(
               (er) => {
