@@ -43,7 +43,7 @@ const setupEslint: SetupEslint = ({ setupEnvWork, onStdOut }) => {
         __dirname,
         IS_TEST
           ? "../resource/eslint-config-template.hbs"
-          : "../../../../impl/resource/eslinst-config-template.hbs",
+          : "../../../../impl/resource/eslint-config-template.hbs",
       ),
       "./eslintrc.js",
       {
