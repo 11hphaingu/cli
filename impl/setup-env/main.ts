@@ -28,7 +28,7 @@ export const prepareTsAndEslWith = (
           tsconfigPath: options["tsconfigpath"] as string,
         }),
     buildDir: options["buildDir"] as string,
-    testDir: options["testFolder"] as string,
+    testDir: options["testDir"] as string,
     projectType: options["projectType"] as ProjectTypes,
     projectSpecificType: getProjectSpecificType(
       options["projectSpecificType"] as string,

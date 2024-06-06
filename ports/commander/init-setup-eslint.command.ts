@@ -37,7 +37,6 @@ export const initSetupEslintCommand = (program: Command) => {
         )
         .description("setup typescript and eslint for nodejs project")
         .action((projectPath, opts) => {
-          console.log("projectPath", projectPath);
           prepareTsAndEslWith(projectPath, opts)().then(
             Either.match(
               (er) => {
