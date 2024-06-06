@@ -34,7 +34,6 @@
     "app.ts"
   ],
   "exclude": [
-    "node_modules",
     "__test__/**/*.spec-cancel.ts",
     "./dist"
   ]

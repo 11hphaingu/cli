@@ -9,16 +9,14 @@ import { FileSystem } from "core/ports/filestystem-port";
 import { JsonUtil } from "core/ports/json";
 import { ExecaPort } from "core/ports/execa-port";
 import { HBSTemplatePort } from "core/ports/template-port";
-
-export type AddDepsPkjsonParams = {
-  deps: PackageJson["dependencies"];
-  devDeps: PackageJson["devDependencies"];
-};
+import { PkgCfgDeps } from "core/setup-env/base";
 
 interface AddDepsPkjson {
   (
     projectPath: string,
-  ): (params: AddDepsPkjsonParams) => TaskEither.TaskEither<Error, PackageJson>;
+  ): (
+    params: PkgCfgDeps,
+  ) => TaskEither.TaskEither<Error, PackageJson.PackageJsonStandard>;
 }
 
 interface YarnInstall {
@@ -37,15 +35,17 @@ type BuildFileFromTpl = <T = UnknownRecord>(
 
 type ReadPkgJsonFile = (
   jsonPath: string,
-) => TaskEither.TaskEither<Error, PackageJson>;
+) => TaskEither.TaskEither<Error, PackageJson.PackageJsonStandard>;
 
 type WritePkgJsonFile = (
   jsonPath: string,
-) => (content: PackageJson) => TaskEither.TaskEither<Error, void>;
+) => (
+  content: PackageJson.PackageJsonStandard,
+) => TaskEither.TaskEither<Error, void>;
 
 type AddAdditionalScript = (
-  pkg: PackageJson,
-) => (scripts: PackageJson["scripts"]) => PackageJson;
+  pkg: PackageJson.PackageJsonStandard,
+) => (scripts: PackageJson["scripts"]) => PackageJson.PackageJsonStandard;
 
 export const readPkgJsonFile: ReadPkgJsonFile = (
   projectPath: string = process.cwd(),
@@ -53,7 +53,12 @@ export const readPkgJsonFile: ReadPkgJsonFile = (
   pipe(
     path.join(projectPath, "/package.json"),
     FileSystem.readFile,
-    TaskEither.chain(flow(JsonUtil.parse<PackageJson>, TaskEither.fromEither)),
+    TaskEither.chain(
+      flow(
+        JsonUtil.parse<PackageJson.PackageJsonStandard>,
+        TaskEither.fromEither,
+      ),
+    ),
   );
 
 export const writePkgJsonFile: WritePkgJsonFile =
@@ -76,7 +81,7 @@ export const addDepsPkjson: AddDepsPkjson =
               devDependencies: devDeps,
             },
             pkg,
-          ) as PackageJson,
+          ) as PackageJson.PackageJsonStandard,
       ),
       // TaskEither.tapIO((pkgData) => () => console.log("pkgData", pkgData)),
       TaskEither.tap(writePkgJsonFile(projectPath)),
@@ -84,8 +89,12 @@ export const addDepsPkjson: AddDepsPkjson =
   };
 
 export const addScripts: AddAdditionalScript =
-  (pkg: PackageJson) => (scripts: PackageJson["scripts"]) =>
-    pipe(pkg, (pkg) => mergeDeepRight({ scripts }, pkg) as PackageJson);
+  (pkg: PackageJson.PackageJsonStandard) => (scripts: PackageJson["scripts"]) =>
+    pipe(
+      pkg,
+      (pkg) =>
+        mergeDeepRight({ scripts }, pkg) as PackageJson.PackageJsonStandard,
+    );
 
 export const yarnInstall: YarnInstall = (
   projectPath: string,

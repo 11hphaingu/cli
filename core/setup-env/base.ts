@@ -36,10 +36,10 @@ export const getProjectSpecificType = (type: string): ProjectSpecificTypes => {
  *  * Development tools
  *  * Production tools
  */
-export type PkgCfgDeps = {
+export interface PkgCfgDeps {
   deps: Record<string, string>;
   devDeps: Record<string, string>;
-};
+}
 
 /*
  * Model representing the package.json configuration.
@@ -52,12 +52,12 @@ export type PkgCfgDeps = {
  * @model
  */
 
-export type PkgCfg = PkgCfgDeps & {
+export interface PkgCfg extends PkgCfgDeps {
   script: Record<string, string>;
   main: string;
   bin?: string;
   exports?: Record<string, string>;
-};
+}
 
 /**
  * Sets up ESLint configuration for a given project.

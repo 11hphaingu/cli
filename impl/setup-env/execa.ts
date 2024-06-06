@@ -9,6 +9,7 @@ import {
 } from "../helpers";
 import {
   ISetupDevEnv,
+  PkgCfg,
   PkgCfgDeps,
   SetupEslint,
   SetupProjectPackage,
@@ -24,6 +25,7 @@ import {
 } from "core/setup-env/setup-typescript";
 import { getPackageJsonGeneral } from "core/setup-env/setup-deps-and-scripts";
 import path from "path";
+import { PackageJson } from "type-fest";
 
 const updateDepsWith =
   (projectPath: string, onStdOut: (chunk: any) => void): UpdateDeps =>
@@ -45,7 +47,7 @@ const setupEslint: SetupEslint = ({ setupEnvWork, onStdOut }) => {
           ? "../resource/eslint-config-template.hbs"
           : "../../../../impl/resource/eslint-config-template.hbs",
       ),
-      "./eslintrc.js",
+      "./.eslintrc.js",
       {
         parser: params.parser,
         buildFolder: params.buildFolder,
@@ -90,6 +92,16 @@ const setupTypescript: SetupTypescript = ({ setupEnvWork, onStdOut }) => {
   );
 };
 
+const pkgCfgToPkgJsonMapper = (
+  pkgCfg: PkgCfg,
+): PackageJson.PackageJsonStandard => ({
+  scripts: pkgCfg.script,
+  dependencies: pkgCfg.deps,
+  devDependencies: pkgCfg.devDeps,
+  main: pkgCfg.main,
+  bin: pkgCfg.bin,
+  exports: pkgCfg.exports,
+});
 const setupProjectPackages: SetupProjectPackage = ({
   setupEnvWork,
   onStdOut,
@@ -97,6 +109,7 @@ const setupProjectPackages: SetupProjectPackage = ({
   return pipe(
     setupEnvWork.projectSpecificType,
     getPackageJsonGeneral,
+    pkgCfgToPkgJsonMapper,
     writePkgJsonFile(setupEnvWork.projectPath),
     TaskEither.chain(() => yarnInstall(setupEnvWork.projectPath, onStdOut)),
     TaskEither.chain(() =>
