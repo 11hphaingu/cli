@@ -57,11 +57,15 @@ export const executeSetupEslint: Reader.Reader<
     const addPkgParser = (deps: PkgCfgDeps) =>
       hasTs
         ? mergeDeepRight(deps, {
-            "@typescript-eslint/eslint-plugin": "^6.7.0",
-            "@typescript-eslint/parser": "^6.7.0",
+            devDeps: {
+              "@typescript-eslint/eslint-plugin": "^6.7.0",
+              "@typescript-eslint/parser": "^6.7.0",
+            },
           })
         : mergeDeepRight(deps, {
-            "@babel/eslint-parser": "7.24.1",
+            devDeps: {
+              "@babel/eslint-parser": "7.24.1",
+            },
           });
     const deps: PkgCfgDeps = pipe(
       {

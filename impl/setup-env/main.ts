@@ -22,12 +22,12 @@ export const prepareTsAndEslWith = (
     projectPath,
     isSubmodule: options["isSubmodule"] as boolean,
     tsConfig: options["noTs"]
-      ? Option.some({
+      ? Option.none
+      : Option.some({
           declarationMapping: options["hasDeclarationMap"] as boolean,
           includePaths: options["includePaths"] as string[],
           tsconfigPath: options["tsconfigpath"] as string,
-        })
-      : Option.none,
+        }),
     buildDir: options["buildDir"] as string,
     testDir: options["testDir"] as string,
     projectType: options["projectType"] as ProjectTypes,
