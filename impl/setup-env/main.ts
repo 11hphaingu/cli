@@ -17,16 +17,17 @@ export const prepareTsAndEslWith = (
   const progressTrait = ProgressSpinnerTrait;
   const setupDevEnv = SetupDevEnvWithExeca;
   const progress = progressTrait.construct(1, "setup eslint", 2);
+  console.log("no ts ", options["noTs"]);
   const setupEnvWork: SetupEnvWork = {
     projectPath,
     isSubmodule: options["isSubmodule"] as boolean,
     tsConfig: options["noTs"]
-      ? Option.none
-      : Option.some({
+      ? Option.some({
           declarationMapping: options["hasDeclarationMap"] as boolean,
           includePaths: options["includePaths"] as string[],
           tsconfigPath: options["tsconfigpath"] as string,
-        }),
+        })
+      : Option.none,
     buildDir: options["buildDir"] as string,
     testDir: options["testDir"] as string,
     projectType: options["projectType"] as ProjectTypes,
