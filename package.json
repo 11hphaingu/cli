@@ -1,6 +1,6 @@
 {
   "name": "h2to-cli",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "cli for yycorp project",
   "main": "./dist/cjs/app.js",
   "repository": "https://github.com/ylcorp/cli",
